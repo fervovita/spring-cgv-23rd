@@ -1,0 +1,28 @@
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
+
+pg:
+  base-url: ${PG_BASE_URL}
+  store-id: ${PG_STORE_ID}
+  api-secret: ${PG_API_SECRET}
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-token-expiration: ${JWT_ACCESSTOKEN_EXPIRATION}
+  refresh-token-expiration: ${JWT_REFRESHTOKEN_EXPIRATION}
+  cookie-secure: ${JWT_COOKIE_SECURE}
