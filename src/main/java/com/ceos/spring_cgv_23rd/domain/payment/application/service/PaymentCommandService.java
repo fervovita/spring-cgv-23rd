@@ -3,6 +3,7 @@ package com.ceos.spring_cgv_23rd.domain.payment.application.service;
 import java.util.Optional;
 
 import org.slf4j.MDC;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.ceos.spring_cgv_23rd.domain.payment.application.dto.command.PayCommand;
@@ -46,7 +47,15 @@ public class PaymentCommandService implements PaymentUseCase, CancelPaymentUseCa
 			}
 
 			// 결제 대기(READY) 상태 임시 저장
-			Payment payment = txService.createReadyPayment(paymentId, command.orderName(), command.amount());
+			Payment payment;
+			try {
+				payment = txService.createReadyPayment(paymentId, command.orderName(), command.amount());
+			} catch (DataIntegrityViolationException e) {
+				log.info("Concurrent duplicate detected via unique constraint");
+				return paymentPersistencePort.findByPaymentId(paymentId)
+					.map(this::handleDuplicate)
+					.orElseThrow(() -> new GeneralException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+			}
 
 			// 외부 PG사 연동 및 결제 반영
 			try {
